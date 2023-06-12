@@ -2,7 +2,6 @@ import 'package:crypto_tracker/core/res/color.dart';
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:sizer/sizer.dart';
 
 import 'home/dashboard.dart';
 import '../widgets/floating_action_ble_button.dart';
@@ -90,7 +89,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 minLines: 1,
                 decoration: InputDecoration(
                   border: InputBorder.none,
-                  labelText: '單次時間閾值 目前: ${threshDuration}',
+                  labelText: '裝置MAC位址',
                   prefixIcon: Icon(Icons.text_fields),
                 ),
               ),
@@ -110,7 +109,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 maxLines: null,
                 decoration: InputDecoration(
                   border: InputBorder.none,
-                  labelText: '累計時間閾值 目前: ${threshAccum}',
+                  labelText: '資料特性位址',
                   prefixIcon: Icon(Icons.text_fields),
                 ),
               ),

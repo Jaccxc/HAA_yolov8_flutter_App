@@ -1,24 +1,12 @@
-import 'dart:ffi';
-import 'dart:math';
-import 'dart:convert';
 import 'dart:ui';
-import 'package:crypto_tracker/widgets/crypto_card.dart';
+import 'package:crypto_tracker/models/saveAndLoadHandler.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:easy_image_viewer/easy_image_viewer.dart';
-
+import 'package:chart_sparkline/chart_sparkline.dart';
+import 'dart:math';
 import 'package:sizer/sizer.dart';
-import 'package:http/http.dart' as http;
 
-import 'package:shared_preferences/shared_preferences.dart';
-
-// To parse this JSON data, do
-//
-//     final goatLog = goatLogFromJson(jsonString);
-
-import 'package:meta/meta.dart';
-import 'dart:convert';
 
 
 class DashboardScreen extends StatefulWidget {
@@ -28,92 +16,45 @@ class DashboardScreen extends StatefulWidget {
   State<DashboardScreen> createState() => _DashboardScreenState();
 }
 
-Future<http.Response> fetchDataFromIDTypeAccessKey(String id, String type, String access_key) async {
-  Map<String, String> qParams = {
-    'id': id,
-    'type': type,
-    'access_key': access_key,
-  };
-
-  var url = Uri.http("120.126.151.169:5000", "/get_data", qParams);
-
-  print(url);
-
-  // Inside an async function, you can then pass this to http.get
-  final response = await http.get(url);
-
-  return response;
-}
-
-int threshDuration = -1;
-int threshAccum = -1;
 
 class _DashboardScreenState extends State<DashboardScreen>
     with TickerProviderStateMixin {
-  final maxSpeed = 2;
-  final maxTheta = 2 * pi;
-  final maxRadius = 10;
-  var dataLength = 0;
-  String currentSelectedDate = '1990/1/1';
+
+  String dateToday = "";
+  List<Map<String, dynamic>> PPGHistory = [];
   List<DynamicItem> DynamicList = [];
-  final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
-  late Future<int> _counter1;
-  late Future<int> _counter2;
+  List<double> lineData = List.filled(150, 0, growable: true);
 
-
-  void _updateGoatView(String date) async{
-    // var response = await fetchDataFromDate(date);
-    // print('Response status: ${response.statusCode}');
-    print('Response body:');
-    // var parsedGoatLog = goatLogFromJson(response.body);
-
-    // print(parsedGoatLog);
-
+  void _updateNIRView() async{
+    PPGHistory = await loadFromLocal();
     DynamicList.clear();
 
-    int currentKey = 1;
-    // while(parsedGoatLog.containsKey(currentKey.toString())){
-    //   DynamicList.add(new DynamicItem(data: parsedGoatLog[currentKey.toString()],));
-    //   currentKey++;
-    // }
+    List<DynamicItem> tempList = [];
 
-    threshDuration = await _getThreshDuration();
-    threshAccum = await _getThreshAccum();
+    for (var item in PPGHistory) {
+      tempList.add(DynamicItem(data: item, onTapData: updateNIRGraph));
+    }
 
-    print('Length: ${DynamicList.length}');
+    DynamicList = tempList.reversed.toList();
+
     setState(() { });
+  }
+
+  void updateNIRGraph(List<double> data) async{
+    lineData = data;
   }
 
   @override
   initState() {
     super.initState();
     () async {
-      WidgetsBinding.instance.addPostFrameCallback((_) async {
-        DateTime now = new DateTime.now();
-        var formatter = new DateFormat('yyyy/MM/dd');
-        String formattedDate = formatter.format(now);
-        _updateGoatView(formattedDate);
-        currentSelectedDate = formattedDate;
-        threshDuration = await _getThreshDuration();
-        threshAccum = await _getThreshAccum();
-        print(threshDuration);
-        print(threshAccum);
-        setState(() {});
-      });
+      _updateNIRView();
+      PPGHistory = await loadFromLocal();
+      lineData = (PPGHistory.last["PPGSequence"][0] as List<dynamic>).cast<double>();
     } ();
-  }
-
-  Future<int> _getThreshDuration() async {
-    _counter1 = _prefs.then((SharedPreferences prefs) {
-      return prefs.getInt('durationThresh') ?? 900;
-    });
-    return _counter1;
-  }
-  Future<int> _getThreshAccum() async {
-    _counter2 = _prefs.then((SharedPreferences prefs) {
-      return prefs.getInt('accumThresh') ?? 3600;
-    });
-    return _counter2;
+    DateTime now = new DateTime.now();
+    var formatter = new DateFormat('yyyy/MM/dd');
+    dateToday = formatter.format(now);
   }
 
   @override
@@ -123,31 +64,42 @@ class _DashboardScreenState extends State<DashboardScreen>
 
   @override
   Widget build(BuildContext context) {
-
+    _updateNIRView();
     return RefreshIndicator(
       onRefresh: () async {
-        _updateGoatView(currentSelectedDate);
+        _updateNIRView();
       },
       child: Container(
         height: 100.h,
         decoration: BoxDecoration(image: DecorationImage(image: Image.asset("assets/design.png").image, fit: BoxFit.cover)),
         child: ListView.builder(
+          physics: BouncingScrollPhysics(),
           itemCount: DynamicList.length+1,
           itemBuilder: (_, index) {
-            return new Padding(
-              padding: new EdgeInsets.all(10.0),
-              child: new Column(
+            return Padding(
+              padding: EdgeInsets.all(10.0),
+              child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  new Container(
-                    margin: new EdgeInsets.only(left: 10.0),
+                  Container(
+                    margin: EdgeInsets.only(left: 10.0),
                   ),
                   (index == 0) ?  Container(
                     height: 250,
-                    child: Card(
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.7),
+                      borderRadius: BorderRadius.circular(15), // Replace "10" with your desired corner radius
+                    ),
+                    child: Sparkline(
+                      useCubicSmoothing: true,
+                      lineWidth: 2.5,
+                      max: lineData.reduce(max)*1.08,
+                      min: lineData.reduce(min)*0.9,
+                      data: lineData,
+                      lineColor: Colors.blue,
                     )
                   ) : DynamicList[index-1],
-                  (DynamicList.length == 0) ? noDataOnThisDate( date: currentSelectedDate) : Container(),
+                  (DynamicList.length == 0) ? noDataOnThisDate( date: dateToday) : Container(),
                 ],
               ) ,
             );
@@ -224,7 +176,7 @@ class noDataOnThisDate extends StatelessWidget{
           ),
           Align(
             child: Text(
-              "${date}",
+              date,
               style: TextStyle(color: Colors.white.withOpacity(0.8), fontSize: 26, fontWeight: FontWeight.bold),
             ),
           ),
@@ -244,117 +196,139 @@ class noDataOnThisDate extends StatelessWidget{
 }
 
 class DynamicItem extends StatelessWidget {
-  // final GoatLog? data;
-  // DynamicItem({required this.data});
+  final Map<String, dynamic>? data;
+  final Function(List<double>) onTapData;
+
+  DynamicItem({required this.data, required this.onTapData});
+
   final Color textColor = Colors.white.withOpacity(0.7);
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: () {
-        // showImageViewer(
-            // context,
-            // Image.network("http://jacc.tw:5000/getImage?IMG_ID=" + (data?.imgId ?? 0).toString())
-            //     .image,
-            // swipeDismissible: true);
+      onTap: (){ onTapData((data?["PPGSequence"][0] as List<dynamic>).cast<double>()); },
+      onLongPress: () {
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            // return object of type Dialog
+            return AlertDialog(
+              title: Text("Delete Data"),
+              content: Text("Are you sure you want to delete this item?"),
+              actions: <Widget>[
+                // usually buttons at the bottom of the dialog
+                TextButton(
+                  child: Text("Yes"),
+                  onPressed: () {
+                    // put your delete function here
+                    deleteDataByDate(data?["datetime"]);
+                    Navigator.of(context).pop();
+                  },
+                ),
+                TextButton(
+                  child: Text("No"),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ],
+            );
+          },
+        );
       },
       child: Container(
-        // child: Center(
-        //   child: FrostedGlassBox(
-        //     key: UniqueKey(),
-        //     width: 100.w,
-        //     height: 180,
-        //     child: Center(
-        //       child: Column(
-        //         mainAxisAlignment: MainAxisAlignment.start,
-        //         children: [
-        //           Align(
-        //             alignment: Alignment.topLeft,
-        //             heightFactor: 1.2,
-        //             child: Text(
-        //               " \n     ${data?.logTime.year}-${data?.logTime.month}-${data?.logTime.day},  ${data?.logTime.hour}:${data?.logTime.minute}:${data?.logTime.second}",
-        //               style: TextStyle(color: textColor, fontSize: 17, fontWeight: FontWeight.bold),
-        //             ),
-        //           ),
-        //
-        //           Row(
-        //             mainAxisAlignment: MainAxisAlignment.start,
-        //             children: [
-        //               Align(
-        //                 heightFactor: 0.55,
-        //                 alignment: Alignment.topLeft,
-        //                 child: Text(
-        //                   "       單次連續出現時長:             \n",
-        //                   style: TextStyle(color: textColor, fontSize: 16),
-        //                 ),
-        //               ),
-        //               Align(
-        //                 heightFactor: 0.55,
-        //                 alignment: Alignment.topRight,
-        //                 child: Text(
-        //                   "羊隻編號: ${data?.id}\n",
-        //                   style: TextStyle(color: textColor, fontSize: 16),
-        //                 ),
-        //               )
-        //             ],
-        //           ),
-        //
-        //           Align(
-        //             alignment: Alignment.topLeft,
-        //             heightFactor: 0.7,
-        //             widthFactor: 5.5,
-        //             child: Text(
-        //               "           ${data?.duration.hour}:${data?.duration.minute}:${data?.duration.second}\n",
-        //               style: TextStyle(
-        //                   color: (int.parse(data?.duration.totalSeconds ?? "") < threshDuration) ?
-        //                   textColor : Colors.red.shade800.withOpacity(0.7),
-        //                   fontSize: 16,
-        //                   fontWeight: (int.parse(data?.duration.totalSeconds ?? "") < threshDuration) ?
-        //                   FontWeight.normal : FontWeight.bold
-        //               ),
-        //             ),
-        //           ),
-        //
-        //           Row(
-        //             mainAxisAlignment: MainAxisAlignment.start,
-        //             children: [
-        //               Align(
-        //                 heightFactor: 0.55,
-        //                 alignment: Alignment.topLeft,
-        //                 child: Text(
-        //                   "       總出現時長:                          \n",
-        //                   style: TextStyle(color: textColor, fontSize: 16),
-        //                 ),
-        //               ),
-        //               Align(
-        //                 heightFactor: 0.55,
-        //                 alignment: Alignment.topRight,
-        //                 child: Text(
-        //                   "影像編號: ${data?.imgId}\n",
-        //                   style: TextStyle(color: textColor, fontSize: 16),
-        //                 ),
-        //               )
-        //             ],
-        //           ),
-        //           Align(
-        //             alignment: Alignment.topLeft,
-        //             heightFactor: 0,
-        //             child: Text(
-        //               "           ${data?.accumulation.hour}:${data?.accumulation.minute}:${data?.accumulation.second}\n",
-        //               style: TextStyle(
-        //                   color: (int.parse(data?.accumulation.totalSeconds ?? "") < threshAccum) ?
-        //                   textColor : Colors.red.shade900.withOpacity(0.7),
-        //                   fontSize: 16,
-        //                   fontWeight: (int.parse(data?.accumulation.totalSeconds ?? "") < threshAccum) ?
-        //                   FontWeight.normal : FontWeight.bold),
-        //             ),
-        //           ),
-        //
-        //         ],
-        //       ),
-        //     ),
-        //   ),
-        // ),
+        child: Center(
+          child: FrostedGlassBox(
+            key: UniqueKey(),
+            width: 100.w,
+            height: 160,
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  Align(
+                    alignment: Alignment.topLeft,
+                    heightFactor: 1.2,
+                    child: Text(
+                      " \n     ${data?["datetime"].substring(0,10)}",
+                      style: TextStyle(color: textColor, fontSize: 17, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Align(
+                        heightFactor: 0.55,
+                        alignment: Alignment.topLeft,
+                        child: Text(
+                          "       NIR測量時間:             \n",
+                          style: TextStyle(color: textColor, fontSize: 16),
+                        ),
+                      ),
+                      Align(
+                        heightFactor: 0.55,
+                        alignment: Alignment.topRight,
+                        child: Text(
+                          "   測量種類: ${data?["type"]}\n",
+                          style: TextStyle(color: textColor, fontSize: 16),
+                        ),
+                      )
+                    ],
+                  ),
+
+                  Align(
+                    alignment: Alignment.topLeft,
+                    heightFactor: 0.7,
+                    widthFactor: 5.5,
+                    child: Text(
+                      "               ${data?["datetime"].substring(11,19)}\n",
+                      style: TextStyle(
+                          color: textColor,
+                          fontSize: 16,
+                          fontWeight: FontWeight.normal
+                      ),
+                    ),
+                  ),
+
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Align(
+                        heightFactor: 0.55,
+                        alignment: Alignment.topLeft,
+                        child: Text(
+                          "       NIR測量時長:               \n",
+                          style: TextStyle(color: textColor, fontSize: 16),
+                        ),
+                      ),
+                      Align(
+                        heightFactor: 0.55,
+                        alignment: Alignment.topRight,
+                        child: Text(
+                          "      預測值: ${((data?["prediction"])%150).toStringAsFixed(2)}\n",
+                          style: TextStyle(color: textColor, fontSize: 16),
+                        ),
+                      )
+                    ],
+                  ),
+                  Align(
+                    alignment: Alignment.topLeft,
+                    heightFactor: 0,
+                    child: Text(
+                      "               00:00:0${2}\n",
+                      style: TextStyle(
+                          color: textColor,
+                          fontSize: 16,
+                          fontWeight: FontWeight.normal
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
       )
     );
   }

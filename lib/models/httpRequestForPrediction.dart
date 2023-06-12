@@ -6,6 +6,7 @@ Future<double> requestPrediction(List<List<double>> PPGSequence) async {
   String type = "";
   final String _IP_ADDRESS = "120.126.151.169:5000";
   Map<String, dynamic>? pollResponseBody = null;
+  var completer = Completer<double>();
 
   if(PPGSequence.length == 3){
     type = "nir_bg";
@@ -85,6 +86,7 @@ Future<double> requestPrediction(List<List<double>> PPGSequence) async {
         // stop the timer when the response content is not empty
         timer.cancel();
         // handle the polling response
+        completer.complete(pollResponseBody?['result']);
         print('Success, Polling response body: ${pollResponse.body}');
       } else {
         print('Failed, Polling response body: ${pollResponse.body}');
@@ -92,11 +94,8 @@ Future<double> requestPrediction(List<List<double>> PPGSequence) async {
     });
   } else {
     print('Initial request failed with status: ${response.statusCode}.');
+    completer.completeError('Error: ${response.statusCode}');
   }
 
-  if(pollResponseBody == null){
-    return -0.1;
-  } else {
-    return pollResponseBody!['result'];
-  }
+  return completer.future;
 }

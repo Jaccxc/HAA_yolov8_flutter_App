@@ -2,7 +2,6 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
-import 'package:http/http.dart' as http;
 import '../models/httpRequestForPrediction.dart';
 import '../models/saveAndLoadHandler.dart';
 import 'loading_dialog.dart';
@@ -45,6 +44,7 @@ class _BluetoothFloatingButtonState extends State<BluetoothFloatingButton> {
     } else {
       _sendStartOp();
     }
+    setState(() {});
   }
 
   void _splitListIntoSegments(List<double> allFloats) {
@@ -52,7 +52,7 @@ class _BluetoothFloatingButtonState extends State<BluetoothFloatingButton> {
 
     if (allFloats.length % segments != 0) {
       return;
-      throw Exception("The length of the list is not divisible by the number of segments");
+      // throw Exception("The length of the list is not divisible by the number of segments");
     }
 
     int segmentSize = allFloats.length ~/ segments;
@@ -160,26 +160,23 @@ class _BluetoothFloatingButtonState extends State<BluetoothFloatingButton> {
 
       _dataCharacteristic?.onValueChangedStream.listen((value) async{
         // print("notify value: $value, len=${value.length}");
-        if (value != null) {
-          final bytes = Uint8List.fromList(value);
+        final bytes = Uint8List.fromList(value);
 
-          for (var i = 0; i < bytes.length; i += 4) {
-            final byteData = bytes.buffer.asByteData(i, 4);
-            double value = byteData.getFloat32(0, Endian.little);
-            print(value); // Prints the float value
-            if(value > -100){
-              floatBuffer.add(value);
-            }
+        for (var i = 0; i < bytes.length; i += 4) {
+          final byteData = bytes.buffer.asByteData(i, 4);
+          double value = byteData.getFloat32(0, Endian.little);
+          print(value); // Prints the float value
+          if(value > -100){
+            floatBuffer.add(value);
           }
         }
+
       });
       _endNotifyCharacteristic?.onValueChangedStream.listen((value) async{
-        if(value != null){
-          final bytes = Uint8List.fromList(value);
-          final byteData = bytes.buffer.asByteData(0, 4);
-          double float_value = byteData.getFloat32(0, Endian.little);
-          print("end notify value: $float_value");
-        }
+        final bytes = Uint8List.fromList(value);
+        final byteData = bytes.buffer.asByteData(0, 4);
+        double float_value = byteData.getFloat32(0, Endian.little);
+        print("end notify value: $float_value");
 
         _splitListIntoSegments(floatBuffer);
 
