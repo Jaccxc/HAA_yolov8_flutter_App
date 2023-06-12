@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:http/http.dart' as http;
 import '../models/httpRequestForPrediction.dart';
+import '../models/saveAndLoadHandler.dart';
 import 'loading_dialog.dart';
 
 class BluetoothFloatingButton extends StatefulWidget {
@@ -191,7 +192,7 @@ class _BluetoothFloatingButtonState extends State<BluetoothFloatingButton> {
 
         showLoadingDialog(context, "Predicting...");
         double prediction = await requestPrediction(currentPPGSequence);
-        saveToLocal(currentPPGSequence, prediction);
+        saveToLocal(currentPPGSequence, _NIRS_TYPE, prediction);
         Navigator.pop(context);
       });
       _isListening = true;
