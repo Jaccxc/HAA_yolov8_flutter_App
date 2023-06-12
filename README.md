@@ -2,15 +2,28 @@
 
 NIR app
 
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Things to note:
+    Inorder to make release version of the app to work.
+    For bluetooth plus to work:
+        in ./android/app/build.gradle:
+            in defaultConfig
+                minSdkVersion 19 must be added.
+            in buildTypes:
+`                release {
+                    minifyEnabled true
+                    shrinkResources true
+                    proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+                    signingConfig signingConfigs.debug
+                }`
+        in ./android/app/proguard-rules.pro:
+                # for flutter_blue_plus
+`                -keep class com.boskokg.flutter_blue_plus.** { *; }
+                # for flutter_blue
+                -keep class com.pauldemarco.flutter_blue.** { *; }`
+    For bluetooth and http permission:
+            in ./android/app/src/main/AndroidManifest.xml:
+`                <uses-permission android:name="android.permission.BLUETOOTH" />
+                <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+                <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+                <uses-permission android:name="android.permission.INTERNET" />
+`
