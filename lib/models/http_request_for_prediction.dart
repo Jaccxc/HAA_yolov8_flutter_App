@@ -4,8 +4,8 @@ import 'package:http/http.dart' as http;
 
 Future<double> requestPrediction(List<List<double>> PPGSequence) async {
   String type = "";
-  final String _IP_ADDRESS = "120.126.151.169:5000";
-  Map<String, dynamic>? pollResponseBody = null;
+  const String _IP_ADDRESS = "120.126.151.169:5000";
+  Map<String, dynamic>? pollResponseBody;
   var completer = Completer<double>();
 
   if(PPGSequence.length == 3){
@@ -73,9 +73,9 @@ Future<double> requestPrediction(List<List<double>> PPGSequence) async {
     var id = responseBody['id'];
     var accessKey = responseBody['access_key'];
     // start polling
-    Timer.periodic(Duration(milliseconds: 500), (Timer timer) async {
+    Timer.periodic(const Duration(milliseconds: 500), (Timer timer) async {
       // the polling request
-      print("reqeusting with id=$id key=$accessKey");
+      print("requesting with id=$id key=$accessKey");
       var pollResponse = await http.get(
         Uri.parse('http://120.126.151.169:5000/get_data?id=$id&type=$type&access_key=$accessKey'),
       );

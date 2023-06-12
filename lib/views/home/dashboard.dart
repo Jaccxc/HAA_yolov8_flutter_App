@@ -1,6 +1,5 @@
 import 'dart:ui';
-import 'package:crypto_tracker/models/saveAndLoadHandler.dart';
-import 'package:flutter/foundation.dart';
+import 'package:crypto_tracker/models/save_and_load_handler.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:chart_sparkline/chart_sparkline.dart';
@@ -52,8 +51,8 @@ class _DashboardScreenState extends State<DashboardScreen>
       PPGHistory = await loadFromLocal();
       lineData = (PPGHistory.last["PPGSequence"][0] as List<dynamic>).cast<double>();
     } ();
-    DateTime now = new DateTime.now();
-    var formatter = new DateFormat('yyyy/MM/dd');
+    DateTime now = DateTime.now();
+    var formatter = DateFormat('yyyy/MM/dd');
     dateToday = formatter.format(now);
   }
 
@@ -73,16 +72,16 @@ class _DashboardScreenState extends State<DashboardScreen>
         height: 100.h,
         decoration: BoxDecoration(image: DecorationImage(image: Image.asset("assets/design.png").image, fit: BoxFit.cover)),
         child: ListView.builder(
-          physics: BouncingScrollPhysics(),
+          physics: const BouncingScrollPhysics(),
           itemCount: DynamicList.length+1,
           itemBuilder: (_, index) {
             return Padding(
-              padding: EdgeInsets.all(10.0),
+              padding: const EdgeInsets.all(10.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   Container(
-                    margin: EdgeInsets.only(left: 10.0),
+                    margin: const EdgeInsets.only(left: 10.0),
                   ),
                   (index == 0) ?  Container(
                     height: 250,
@@ -99,7 +98,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                       lineColor: Colors.blue,
                     )
                   ) : DynamicList[index-1],
-                  (DynamicList.length == 0) ? noDataOnThisDate( date: dateToday) : Container(),
+                  (DynamicList.isEmpty) ? noDataOnThisDate( date: dateToday) : Container(),
                 ],
               ) ,
             );
@@ -131,7 +130,7 @@ class FrostedGlassBox extends StatelessWidget {
                 sigmaX: 7.0,
                 sigmaY: 7.0,
               ),
-              child: Container(width: width, height: height, child: Text(" ")),
+              child: Container(width: width, height: height, child: const Text(" ")),
             ),
             Opacity(
                 opacity: 0.15,
@@ -149,7 +148,7 @@ class FrostedGlassBox extends StatelessWidget {
                   gradient: LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [
                     Colors.white.withOpacity(0.5),
                     Colors.white.withOpacity(0.1),
-                  ], stops: [
+                  ], stops: const [
                     0.0,
                     1.0,
                   ])),
@@ -213,12 +212,12 @@ class DynamicItem extends StatelessWidget {
           builder: (BuildContext context) {
             // return object of type Dialog
             return AlertDialog(
-              title: Text("Delete Data"),
-              content: Text("Are you sure you want to delete this item?"),
+              title: const Text("Delete Data"),
+              content: const Text("Are you sure you want to delete this item?"),
               actions: <Widget>[
                 // usually buttons at the bottom of the dialog
                 TextButton(
-                  child: Text("Yes"),
+                  child: const Text("Yes"),
                   onPressed: () {
                     // put your delete function here
                     deleteDataByDate(data?["datetime"]);
@@ -226,7 +225,7 @@ class DynamicItem extends StatelessWidget {
                   },
                 ),
                 TextButton(
-                  child: Text("No"),
+                  child: const Text("No"),
                   onPressed: () {
                     Navigator.of(context).pop();
                   },

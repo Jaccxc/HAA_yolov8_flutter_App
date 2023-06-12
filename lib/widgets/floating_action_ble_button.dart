@@ -2,8 +2,8 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
-import '../models/httpRequestForPrediction.dart';
-import '../models/saveAndLoadHandler.dart';
+import '../models/http_request_for_prediction.dart';
+import '../models/save_and_load_handler.dart';
 import 'loading_dialog.dart';
 
 class BluetoothFloatingButton extends StatefulWidget {

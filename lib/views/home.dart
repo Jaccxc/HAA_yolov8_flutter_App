@@ -87,7 +87,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 controller: threshDurationController,
                 autofocus: false,
                 minLines: 1,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   border: InputBorder.none,
                   labelText: '裝置MAC位址',
                   prefixIcon: Icon(Icons.text_fields),
@@ -107,7 +107,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 keyboardType: TextInputType.multiline,
                 minLines: 1,
                 maxLines: null,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   border: InputBorder.none,
                   labelText: '資料特性位址',
                   prefixIcon: Icon(Icons.text_fields),
@@ -153,8 +153,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       appBar: _selectedBottomIndex == -1
           ? null
           : AppBar(
-              foregroundColor: Color(0x440000),
-              backgroundColor: Color(0x44000000),
+              foregroundColor: const Color(0x440000),
+              backgroundColor: const Color(0x44000000),
               leading: Padding(
                 padding: const EdgeInsets.only(left: 10.0, top: 10, bottom: 10),
                 child: InkWell(
@@ -180,7 +180,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     children: [
                       InkWell(
                         onTap: () => dialogHealper(),
-                        child: Icon(Icons.settings),
+                        child: const Icon(Icons.settings),
                       ),
                       Align(
                         alignment: Alignment.topRight,
