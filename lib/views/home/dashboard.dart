@@ -55,17 +55,23 @@ class _DashboardScreenState extends State<DashboardScreen>
       child: Container(
         height: 100.h,
         decoration: BoxDecoration(image: DecorationImage(image: Image.asset("assets/design.png").image, fit: BoxFit.cover)),
-        child: Padding(
-          padding: const EdgeInsets.only(left:10.0, right: 10.0, top: 100.0),
           child: Stack(
             children: <Widget>[
             // Camera View
-              CameraView(resultsCallback, statsCallback),
-              boundingBoxes(results),
+              Padding(
+                  padding: const EdgeInsets.only(left:0.0, right: 0.0, top: 100.0),
+                  child: CameraView(resultsCallback, statsCallback),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(left:0.0, right: 0.0, top: 100.0),
+                child: Container(
+                  child: boundingBoxes(results),
+                ),
+              ),
               ]
             ),
           ),
-        ),
+
     );
   }
   Widget boundingBoxes(List<Recognition>? results) {

@@ -32,7 +32,7 @@ class IsolateUtils {
     final port = ReceivePort();
     sendPort.send(port.sendPort);
 
-    await for (final IsolateData isolateData in port) {
+    await for (final IsolateData? isolateData in port) {
       if (isolateData != null) {
         Classifier classifier = Classifier(
             interpreter:

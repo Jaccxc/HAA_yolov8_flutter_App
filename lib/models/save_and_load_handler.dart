@@ -11,8 +11,6 @@ Future<File> get _localFile async {
 void saveToLocal(List<List<double>> PPGSequence, String type, double prediction) async {
   final file = await _localFile;
 
-
-
   print("writing to local...");
   // Read the file
   Map<String, dynamic> data = {};
