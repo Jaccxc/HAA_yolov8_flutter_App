@@ -1,5 +1,6 @@
-import 'package:crypto_tracker/views/home.dart';
 import 'package:flutter/material.dart';
+
+import '../../views/home.dart';
 
 class Routes {
   static const home = "/home";

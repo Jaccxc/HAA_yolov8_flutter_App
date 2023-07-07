@@ -1,4 +1,4 @@
-name: crypto_tracker
+name: HAA
 description: A new Flutter project.
 
 # The following line prevents the package from being accidentally published to
@@ -31,18 +31,21 @@ dependencies:
   flutter:
     sdk: flutter
   sizer: null
-  syncfusion_flutter_charts: ^20.1.48
+  syncfusion_flutter_charts: ^22.1.37
   http: ^0.13.5
-  syncfusion_flutter_datepicker: ^20.3.49
-  intl: ^0.17.0
+  intl: ^0.18.1
   localstorage: ^4.0.0+1
   rflutter_alert: ^2.0.4
   awesome_dialog: ^3.0.2
   shared_preferences: ^2.0.15
   easy_image_viewer: ^1.1.0
   flutter_blue_plus: ^1.5.2
-  path_provider: ^2.0.8
-  chart_sparkline: ^1.0.13
+  camera: ^0.10.5+2
+  tflite_flutter: ^0.9.5
+  tflite_flutter_helper: ^0.2.1
+  image: ^3.3.0
+  path_provider: ^2.0.15
+  image_picker: ^1.0.0
 
 dev_dependencies:
   # The "flutter_lints" package below contains a set of recommended lints to
@@ -50,7 +53,7 @@ dev_dependencies:
   # activated in the `analysis_options.yaml` file located at the root of your
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
-  flutter_lints: ^1.0.0
+  flutter_lints: ^2.0.2
   flutter_test:
     sdk: flutter
 

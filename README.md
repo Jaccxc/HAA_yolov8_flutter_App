@@ -11,7 +11,7 @@ Things to note:
             in buildTypes:
 `                release {
                     minifyEnabled true
-                    shrinkResources true
+                    shrinkResources true    
                     proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
                     signingConfig signingConfigs.debug
                 }`

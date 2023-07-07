@@ -1,8 +1,8 @@
-import 'package:crypto_tracker/core/res/color.dart';
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../core/res/color.dart';
 import 'home/dashboard.dart';
 import '../widgets/floating_action_ble_button.dart';
 

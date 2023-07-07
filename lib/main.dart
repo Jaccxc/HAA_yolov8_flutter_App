@@ -1,7 +1,8 @@
-import 'package:crypto_tracker/core/res/color.dart';
-import 'package:crypto_tracker/core/routes/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
+
+import 'core/res/color.dart';
+import 'core/routes/routes.dart';
 
 
 void main() {
